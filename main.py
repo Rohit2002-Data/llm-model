@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request, HTTPException
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-tokenizer = AutoTokenizer.from_pretrained("distilgpt2")
-model = AutoModelForCausalLM.from_pretrained("distilgpt2").to("cpu")
+tokenizer = AutoTokenizer.from_pretrained("sshleifer/tiny-gpt2")
+model = AutoModelForCausalLM.from_pretrained("sshleifer/tiny-gpt2").to("cpu")
 model.eval()
 
 app = FastAPI()
