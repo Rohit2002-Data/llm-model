@@ -2,7 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 
-tokenizer = https://tokenizer-server-h29o.onrender.com/
+tokenizer = "https://tokenizer-server-1.onrender.com/"
 model = AutoModelForCausalLM.from_pretrained("sshleifer/tiny-gpt2").to("cpu")
 model.eval()
 
