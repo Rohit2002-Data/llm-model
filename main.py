@@ -1,28 +1,33 @@
-from fastapi import FastAPI, Request, HTTPException
-from transformers import AutoTokenizer, AutoModelForCausalLM
-import torch
-
-tokenizer = "https://tokenizer-server-1.onrender.com/"
-model = AutoModelForCausalLM.from_pretrained("sshleifer/tiny-gpt2").to("cpu")
-model.eval()
+from fastapi import FastAPI, Request
+import requests
 
 app = FastAPI()
 
+TOKENIZER_URL = "https://tokenizer-server-1.onrender.com/"
+MODEL_URL = "https://model-server-8.onrender.com/"
+
 @app.get("/")
 def home():
-    return {"message": "LLM API is ready."}
+    return {"message": "LLM API Gateway is ready."}
 
 @app.post("/generate/")
 async def generate(request: Request):
-    data = await request.json()
-    prompt = data.get("prompt", "").strip()
+    try:
+        data = await request.json()
+        prompt = data.get("prompt", "").strip()
 
-    if not prompt:
-        return {"response": "Prompt is empty."}
+        if not prompt:
+            return {"response": "Prompt is empty."}
 
-    inputs = tokenizer(prompt, return_tensors="pt")
-    with torch.no_grad():
-        outputs = model.generate(**inputs, max_new_tokens=30, do_sample=True, temperature=0.7)
-    result = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # 1. Tokenize
+        tokenizer_response = requests.post(f"{TOKENIZER_URL}tokenize/", json={"prompt": prompt})
+        tokenizer_data = tokenizer_response.json()
 
-    return {"response": result}
+        # 2. Generate
+        model_response = requests.post(f"{MODEL_URL}generate/", json=tokenizer_data)
+        model_output = model_response.json()
+
+        return model_output  # This should include "output_ids" or "response"
+
+    except Exception as e:
+        return {"error": f"Exception: {str(e)}"}
